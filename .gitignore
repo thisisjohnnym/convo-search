@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+catalog-source/img
+catalog-source/img2
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+.env*

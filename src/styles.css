@@ -1,0 +1,63 @@
+:root {
+  /* Tokens taken from the Paper file "Coach - Convo search" */
+  --black: #000000;
+  --white: #ffffff;
+  --grey-bg: #f0f0f0;
+  --header: #333333;
+  --outline: #cfcfcf;
+  --divider: #dcdcdc;
+  --muted: #727272;
+  --placeholder: #8f8f8f;
+  --kb: #dddddd;
+  --browser: #a1a1a1;
+
+  --font-label: 'Helvetica Neue LT Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Helvetica Now Var', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--font-body);
+  color: var(--black);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-align: inherit; }
+input { font: inherit; color: inherit; background: none; border: 0; outline: 0; width: 100%; }
+
+/* Page: full-width on phones, capped at 500px and centered on anything wider. No device frame. */
+.stage { height: 100%; display: flex; justify-content: center; background: var(--white); }
+.phone {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  height: 100%;
+  height: var(--app-h, 100dvh); /* iOS Safari: follows the visual viewport (keyboard, toolbar) */
+  background: var(--white);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.label { font-family: var(--font-label); letter-spacing: 0.02em; }
+.scroll { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+
+.icon { font-family: 'Material Symbols Outlined', 'Material Icons Outlined'; line-height: 1; font-weight: normal; font-style: normal; display: inline-block; }
+
+/* Pills & chips (square corners, 1px outline: matches the Paper file) */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--white); outline: 1px solid var(--outline);
+  padding: 8px; font-size: 16px; line-height: 1; white-space: nowrap;
+}
+.btn-black {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--black); color: var(--white); padding: 12px 16px;
+  font-family: var(--font-label); font-size: 14px; letter-spacing: 0.02em;
+}
