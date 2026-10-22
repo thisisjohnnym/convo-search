@@ -6,3 +6,4 @@ catalog-source/img2
 tsconfig.tsbuildinfo
 *.tsbuildinfo
 .env*
+.vercel

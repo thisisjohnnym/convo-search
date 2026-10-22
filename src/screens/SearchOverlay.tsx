@@ -143,7 +143,7 @@ export function SearchOverlay({ app }: { app: App }) {
       <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
         {/* SEARCH BODY */}
         <Presence show={open && !inThread} size="base" mode="children" delay={enterDelay} style={{ position: 'absolute', inset: 0 }}>
-          <div className="scroll" style={{ height: '100%', padding: '0 0 24px' }}>
+          <div className="scroll" onTouchMove={app.dismissKeyboard} style={{ height: '100%', padding: '0 0 24px' }}>
             {isEmpty ? (
               <div style={{ padding: '24px 8px 0' }}>
                 <div data-enter className="label" style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12 }}>Previously searched</div>
@@ -226,10 +226,10 @@ export function SearchOverlay({ app }: { app: App }) {
             <input value={msg} onChange={(e) => setMsg(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submitInput()} placeholder="Ask anything about these bags" enterKeyHint="send" style={{ fontSize: 16 }} />
           ) : (
             <input id="search-input" ref={inputRef} value={typed} onChange={(e) => app.setTyped(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submitInput()}
-              placeholder={baseChips.length ? 'Tap to add more terms' : 'Tap to start searching'} enterKeyHint="search" autoCapitalize="off" autoCorrect="off" style={{ fontSize: 16 }} />
+              placeholder={baseChips.length ? 'Tap to add more terms' : 'Tap to start searching'} enterKeyHint="done" autoCapitalize="off" autoCorrect="off" style={{ fontSize: 16 }} />
           )}
           <span style={{ display: 'flex', alignItems: 'center', gap: 14, paddingRight: 6 }}>
-            {(inThread ? msg : typed) ? <button data-press onClick={submitInput} aria-label="Send"><span className="icon" style={{ fontSize: 20 }}>send</span></button> : <span className="icon" style={{ fontSize: 20 }}>mic</span>}
+            {(inThread ? msg : typed) ? <button data-press onClick={submitInput} aria-label={inThread ? 'Send' : 'Done'}><span className="icon" style={{ fontSize: 20 }}>{inThread ? 'send' : 'check'}</span></button> : <span className="icon" style={{ fontSize: 20 }}>mic</span>}
           </span>
         </div>
       </div>

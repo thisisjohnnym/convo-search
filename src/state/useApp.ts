@@ -13,6 +13,9 @@ export type Screen = 'plp' | 'results'
 
 export type App = ReturnType<typeof useApp>
 
+/** Tapping a result-shaping control hands the screen back to the options: drop the keyboard (typing itself never does). */
+const hideKeyboard = () => (document.getElementById('search-input') as HTMLInputElement | null)?.blur()
+
 export function useApp() {
   const [screen, setScreen] = useState<Screen>('plp')
   const [overlay, setOverlay] = useState<Overlay>('closed')
@@ -45,12 +48,12 @@ export function useApp() {
   }, [])
   const closeOverlay = useCallback(() => { telemetry.log('close_overlay'); setOverlay('closed'); setThread(null); setCoachTyping(false) }, [])
 
-  const tapSuggestion = useCallback((s: Suggestion) => { telemetry.log('tap_suggestion', { text: s.text }); setBase(s.filters); setTyped(''); setAdds((n) => n + 1) }, [])
-  const addChip = useCallback((c: Chip) => { telemetry.log('tap_next_pill', { label: c.label }); setBase(applyChip(view.filters, c)); setTyped(''); setAdds((n) => n + 1) }, [view.filters])
+  const tapSuggestion = useCallback((s: Suggestion) => { telemetry.log('tap_suggestion', { text: s.text }); hideKeyboard(); setBase(s.filters); setTyped(''); setAdds((n) => n + 1) }, [])
+  const addChip = useCallback((c: Chip) => { telemetry.log('tap_next_pill', { label: c.label }); hideKeyboard(); setBase(applyChip(view.filters, c)); setTyped(''); setAdds((n) => n + 1) }, [view.filters])
   const removeChip = useCallback((c: Chip) => { telemetry.log('remove_chip', { label: c.label }); setBase(removeChipF(base, c)); setAdds(0) }, [base])
   // finish the unfinished last word in place; typed text and focus stay put
   const complete = useCallback((text: string) => { telemetry.log('tap_completion', { text }); setTyped((t) => t.replace(/[^\s]+$/, '') + text + ' ') }, [])
-  const tapRelax = useCallback((r: { filters: Filters; label?: string }) => { telemetry.log('tap_relax', { label: r.label }); setBase(r.filters); setTyped(''); setAdds((n) => n + 1) }, [])
+  const tapRelax = useCallback((r: { filters: Filters; label?: string }) => { telemetry.log('tap_relax', { label: r.label }); hideKeyboard(); setBase(r.filters); setTyped(''); setAdds((n) => n + 1) }, [])
   const tapProduct = useCallback(() => { telemetry.log('tap_product'); setAdds(0) }, [])
 
   const goResults = useCallback((f: Filters) => {
@@ -64,17 +67,14 @@ export function useApp() {
     setThread({ msgs: opening(filters, trigger), filters, baseline: search(filters).reduce((a, p) => a + p.skus, 0), answered: [] })
     setOverlay('thread')
   }, [])
-  // Enter: land on results, stay in the overlay when nothing matches (the rescue is the answer),
-  // and hand a query we could not read at all to Coach instead of dumping the whole catalog
+  // Enter / Done only puts the keyboard away: the overlay itself is where people explore, so nothing commits or navigates
   const submit = useCallback(() => {
-    const parsed = parseQuery(typed)
-    const merged = computeView(base, typed, { refinementsWithoutTap: 0 })
-    if (parsed.kind === 'empty' && isEmptyFilters(base)) { telemetry.log('submit', { typed, outcome: 'empty' }); return }
-    if (merged.mode === 'zero') { telemetry.log('submit', { typed, outcome: 'stayed_zero_results' }); return }
-    telemetry.log('submit', { typed, outcome: isEmptyFilters(merged.filters) ? 'to_coach_not_understood' : 'to_results' })
-    if (isEmptyFilters(merged.filters)) { startThread(merged.filters, 'vague', 'plp'); return }
-    goResults(merged.filters)
-  }, [base, typed, goResults, startThread])
+    if (!typed.trim() && isEmptyFilters(base)) return
+    telemetry.log('submit', { typed, outcome: 'keyboard_dismissed', mode: view.mode })
+    hideKeyboard()
+  }, [base, typed, view.mode])
+  /** exposed so scrolling the options can put the keyboard away too */
+  const dismissKeyboard = hideKeyboard
   const askCoach = useCallback(() => {
     const t: Trigger = isEmptyFilters(view.filters) ? 'manual' : view.mode === 'zero' ? 'zero' : view.mode === 'vague' ? 'vague' : view.mode === 'stalled' ? 'stalled' : 'normal'
     startThread(view.filters, t, 'plp')
@@ -126,7 +126,7 @@ export function useApp() {
 
   return {
     screen, overlay, base, typed, setTyped, adds, view, thread, coachTyping, resultsF,
-    openSearch, closeOverlay, tapSuggestion, addChip, complete, removeChip, tapRelax, tapProduct, submit,
+    openSearch, closeOverlay, dismissKeyboard, tapSuggestion, addChip, complete, removeChip, tapRelax, tapProduct, submit,
     reset, askCoach, askCoachFromResults, answer, showThese, removeResultChip, backToSearch,
     relaxFor: (f: Filters) => relaxations(f),
   }
